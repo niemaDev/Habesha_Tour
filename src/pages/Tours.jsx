@@ -67,7 +67,7 @@ const Tours = () => {
         
         {/* SIDEBAR FILTERS */}
         <aside className="w-full lg:w-72 space-y-8">
-          <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
+          <div className="bg-transparent p-8 rounded-[2rem] shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 text-[#B95B2A] font-bold uppercase tracking-wider text-xs mb-6">
               <Filter size={16} /> Filters
             </div>
@@ -134,7 +134,7 @@ const Tours = () => {
               placeholder="Search destinations..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-16 pr-8 py-5 bg-white border border-gray-100 rounded-[2rem] shadow-sm outline-none focus:ring-2 focus:ring-[#B95B2A]/10 transition text-lg"
+              className="w-full pl-16 pr-8 py-5 bg-transparent border border-gray-100 rounded-[2rem] shadow-sm outline-none focus:ring-2 focus:ring-[#B95B2A]/10 transition text-lg"
             />
           </div>
 
@@ -145,7 +145,7 @@ const Tours = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {filteredTours.length > 0 ? (
               filteredTours.map((tour) => (
-                <div key={tour.id} className="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-100 group hover:shadow-xl transition-all duration-500">
+                <div key={tour.id} className="bg-transparent rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-100 group hover:shadow-xl transition-all duration-500">
                   {/* Card Image */}
                   <div className="relative h-64 overflow-hidden">
                     <img 
@@ -154,7 +154,7 @@ const Tours = () => {
                       className="w-full h-full object-cover group-hover:scale-110 transition duration-700" 
                       onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1523805009345-7448845a9e53?q=80&w=800'; }}
                     />
-                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1 font-bold text-sm">
+                    <div className="absolute top-4 left-4 bg-transparent/90 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1 font-bold text-sm">
                       <Star size={14} fill="#B95B2A" className="text-[#B95B2A]" /> {tour.rating}
                     </div>
                     <div className="absolute top-4 right-4 bg-[#B95B2A] text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
@@ -188,7 +188,7 @@ const Tours = () => {
                 </div>
               ))
             ) : (
-              <div className="col-span-2 text-center py-20 bg-white rounded-[2.5rem] border border-dashed border-gray-200">
+              <div className="col-span-2 text-center py-20 bg-transparent rounded-[2.5rem] border border-dashed border-gray-200">
                 <p className="text-gray-400 font-medium">No tours match your current filters.</p>
               </div>
             )}

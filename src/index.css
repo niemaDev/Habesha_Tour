@@ -11,60 +11,40 @@
 }
 
 @layer base {
-  html {
-    /* Set base font size for better mobile readability */
-    font-size: 16px;
-    -webkit-text-size-adjust: 100%;
-  }
-
-  body {
-    /* Prevent bouncing effect on mobile browsers */
-    
-    @apply bg-white text-coffee font-sans; 
-    
+  html, body {
+    height: 100%;
     margin: 0;
     padding: 0;
-    
-    /* CRITICAL for mobile: prevents horizontal "wobble" */
-    max-width: 100vw;
-    overflow-x: hidden; 
-    
-    /* Improve font rendering */
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
+    -webkit-text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Fix for mobile input/button styling */
+  body {
+    /* CHANGED: Switched from bg-white to your custom --color-cream or a light gray */
+    /* If your Login/Register is a specific color, use var(--color-...) */
+    background-color: var(--color-cream); 
+    color: var(--color-coffee);
+    font-family: var(--font-sans);
+  }
+
   input, button, textarea, select {
     font: inherit;
-    /* Removes the gray highlight on tap in iOS */
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Ensure all images stay inside their containers */
   img {
     max-width: 100%;
     height: auto;
     display: block;
   }
-  /* Prevent the entire page from bouncing */
-html, body {
-  height: 100%;
-  overflow-x: hidden;
-  overscroll-behavior-y: none; /* This removes the bounce/pull-to-refresh effect */
-}
 }
 
-/* Custom Scrollbar for a premium look (Desktop only) */
+/* Custom Scrollbar */
 @media (min-width: 1024px) {
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #f1f1f1;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #B95B2A;
-    border-radius: 10px;
-  }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: var(--color-burnt-orange); border-radius: 10px; }
 }

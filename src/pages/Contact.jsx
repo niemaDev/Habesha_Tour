@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Phone, Mail, HelpCircle, Send } from 'lucide-react';
+import { MapPin, Phone, Mail, HelpCircle, Send, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -10,22 +10,76 @@ const Contact = () => {
     message: '',
     humanVerify: ''
   });
-const [error, setError] = useState("");
-  const handleSubmit = (e) => {
+
+  const [status, setStatus] = useState({ type: null, message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync all fields to controlled input state handlers
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if(!formData.firstName || !formData.email || !formData.message){
-      setError("Please fill in all required fields before submitting.");
-    return;
-  }
-  setError("");
-  console.log("Form Submitted:", formData);
-    alert("Thank you! Your message has been sent.");
-};
+    setStatus({ type: null, message: "" });
+
+    // Client-side validations
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.message) {
+      setStatus({ type: "error", message: "Please fill in all fields before submitting." });
+      return;
+    }
+
+    if (parseInt(formData.humanVerify, 10) !== 4) {
+      setStatus({ type: "error", message: "Incorrect human verification math response. Please try again." });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('http://localhost/habesha-backend/submit_contact.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+          captcha_answer: parseInt(formData.humanVerify, 10)
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setStatus({ type: "success", message: result.message });
+        // Clear out the state variables on success
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          message: '',
+          humanVerify: ''
+        });
+      } else {
+        setStatus({ type: "error", message: result.message || "An unexpected error occurred." });
+      }
+    } catch (err) {
+      console.error("Submission backend failure: ", err);
+      setStatus({ type: "error", message: "Network error. Please verify your connection to the database server." });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className=" bg-gray-50">
+    <div className="bg-gray-50">
       {/* --- HERO SECTION --- */}
-      <section className=" justify-center text-center bg-[url('/nature.jpg')] bg-cover bg-center h-screen
-      relative min-h-[calc(100vh-214px)] flex items-center  text-white pt-20 pb-40 px-6 md:px-16 lg:px-24 overflow-hidden bg-coffee">
+      <section className="justify-center text-center bg-[url('/nature.jpg')] bg-cover bg-center h-screen
+      relative min-h-[calc(100vh-214px)] flex items-center text-white pt-20 pb-40 px-6 md:px-16 lg:px-24 overflow-hidden bg-coffee">
         <div className="absolute inset-0 z-0">
           <img 
             src="/nature.jpg" 
@@ -60,24 +114,38 @@ const [error, setError] = useState("");
               Send us your queries about your next holiday trip. Habesha Tour can guide and assist you to make your holiday an amazing experience!
             </p>
 
+            {/* STATUS MESSAGE DISPLAY BANNER */}
+            {status.message && (
+              <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 font-bold text-sm border ${
+                status.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'
+              }`}>
+                {status.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+                <span>{status.message}</span>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-bold text-[#4B2E20] mb-2">First Name</label>
                   <input 
                     type="text" 
+                    name="firstName"
+                    value={formData.firstName}
                     placeholder="Enter Name"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4A017] outline-none transition"
-                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4A017] outline-none transition font-semibold"
+                    onChange={handleInputChange}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4B2E20] mb-2">Last Name</label>
                   <input 
                     type="text" 
+                    name="lastName"
+                    value={formData.lastName}
                     placeholder="Enter Last Name"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4A017] outline-none transition"
-                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4A017] outline-none transition font-semibold"
+                    onChange={handleInputChange}
                   />
                 </div>
               </div>
@@ -87,18 +155,22 @@ const [error, setError] = useState("");
                   <label className="block text-sm font-bold text-[#4B2E20] mb-2">Email</label>
                   <input 
                     type="email" 
+                    name="email"
+                    value={formData.email}
                     placeholder="Enter Email"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4A017] outline-none transition"
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4A017] outline-none transition font-semibold"
+                    onChange={handleInputChange}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4B2E20] mb-2">Phone</label>
                   <input 
                     type="text" 
+                    name="phone"
+                    value={formData.phone}
                     placeholder="Enter Phone number"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4A017] outline-none transition"
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4A017] outline-none transition font-semibold"
+                    onChange={handleInputChange}
                   />
                 </div>
               </div>
@@ -107,28 +179,36 @@ const [error, setError] = useState("");
                 <label className="block text-sm font-bold text-[#4B2E20] mb-2">Message</label>
                 <textarea 
                   rows="5" 
+                  name="message"
+                  value={formData.message}
                   placeholder="Write your message"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4A017] outline-none transition resize-none"
-                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4A017] outline-none transition resize-none font-semibold"
+                  onChange={handleInputChange}
                 ></textarea>
               </div>
 
               <div className="md:w-1/2">
                 <label className="block text-sm font-bold text-[#4B2E20] mb-2">Human verification</label>
                 <input 
-                  type="text" 
+                  type="number" 
+                  name="humanVerify"
+                  value={formData.humanVerify}
                   placeholder="Are you human? 3 + 1 ="
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4A017] outline-none transition"
-                  onChange={(e) => setFormData({...formData, humanVerify: e.target.value})}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4A017] outline-none transition font-bold"
+                  onChange={handleInputChange}
                 />
               </div>
-               {error && (
-              <p className="text-red-500 text-sm font-bold animate-bounce">
-               ⚠️ {error}
-                </p>
-                 )}
-              <button className="bg-[#4B2E20] text-white px-10 py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-[#D4A017] transition-all transform hover:scale-105 shadow-lg">
-                Submit
+
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-[#4B2E20] text-white px-10 py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-[#D4A017] transition-all transform hover:scale-102 shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="animate-spin" size={18} /> Sending...
+                  </>
+                ) : "Submit"}
               </button>
             </form>
           </div>
@@ -182,7 +262,7 @@ const [error, setError] = useState("");
       <div className="w-full h-[400px] bg-gray-200">
         <iframe 
           title="location"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d125134.18731306124!2d37.31949103986927!3d11.591244485547071!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1644cea0f925925f%3A0x6734c568d3a86f9!2sBahir%20Dar!5e0!3m2!1sen!2set!4v1713781200000!5m2!1sen!2set"
+          src="https://maps.google.com/maps?q=Bahir%20Dar&t=&z=13&ie=UTF-8&iwloc=&output=embed"
           className="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-500"
           allowFullScreen=""
           loading="lazy"

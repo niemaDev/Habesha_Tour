@@ -6,7 +6,7 @@ import {
 
 const About = () => {
   return (
-    <div className=" bg-white font-poppins">
+    <div className=" bg-transparent font-poppins">
       
       {/* --- SECTION 1: HERO --- */}
       <section className="
@@ -134,7 +134,7 @@ const About = () => {
 
       {/* --- SECTION 7: CALL TO ACTION --- */}
       <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="flex flex-col md:flex-row items-center gap-12 bg-white rounded-3xl p-8 shadow-2xl border border-gray-100">
+        <div className="flex flex-col md:flex-row items-center gap-12 bg-transparent rounded-3xl p-8 shadow-2xl border border-gray-100">
           <div className="w-full md:w-1/2">
             <img src="/gojo.jpg" alt="Get Started" className="w-full h-auto" />
           </div>
@@ -159,7 +159,7 @@ const About = () => {
 // --- HELPER COMPONENTS ---
 
 const ValueCard = ({ icon, title, highlight, desc }) => (
-  <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-50 hover:shadow-md transition group">
+  <div className="bg-transparent p-8 rounded-2xl shadow-sm border border-gray-50 hover:shadow-md transition group">
     <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-6 group-hover:bg-[#D4A017]/10 transition">
       {icon}
     </div>
@@ -171,7 +171,7 @@ const ValueCard = ({ icon, title, highlight, desc }) => (
 );
 
 const TestimonialCard = ({ name, rating, text }) => (
-  <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+  <div className="bg-transparent p-8 rounded-2xl border border-gray-100 shadow-sm">
     <h4 className="text-lg font-bold text-[#4B2E20] mb-4">{name}</h4>
     <p className="text-gray-600 italic mb-6 leading-relaxed">"{text}"</p>
     <div className="flex gap-1">

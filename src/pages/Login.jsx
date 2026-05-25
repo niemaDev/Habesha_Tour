@@ -28,7 +28,8 @@ const Login = () => {
         localStorage.setItem('userRole', result.user.role);
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('userName', result.user.fullName);
-
+        localStorage.setItem('userId', result.user.id);
+        
         // 3. Direct based on role
         if (result.user.role === 'admin') {
           alert("Welcome Admin!");
@@ -46,7 +47,6 @@ const Login = () => {
       alert("Cannot connect to server. Ensure XAMPP is running!");
     }
   };
-
   return (
     <div className="min-h-screen w-full bg-[#B95B2A] flex items-center justify-center px-4 pt-[114px]">
       <div className="bg-white rounded-[2rem] p-8 w-full max-w-[400px] shadow-2xl transform -translate-y-12 animate-in fade-in zoom-in-95 duration-500">
@@ -59,7 +59,6 @@ const Login = () => {
             Sign in to continue your journey
           </p>
         </div>
-
         <form onSubmit={handleLogin} className="space-y-5">
           {/* Email Input */}
           <div className="space-y-1.5">
@@ -110,7 +109,6 @@ const Login = () => {
               </button>
             </div>
           </div>
-
           <div className="flex items-center gap-2 ml-1">
             <input 
               type="checkbox" 
@@ -124,7 +122,6 @@ const Login = () => {
                 Forgot Password?
               </button>
           </div>
-
           <button 
             type="submit"
             className="w-full bg-[#2D1B14] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-[#B95B2A] transition-all shadow-lg shadow-black/10 active:scale-[0.98] mt-2 group"

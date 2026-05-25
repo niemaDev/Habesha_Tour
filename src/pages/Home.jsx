@@ -44,7 +44,7 @@ const Home = () => {
   const prevSlide = () => setCurrent(current === 0 ? slides.length - 1 : current - 1);
 
   return (
-    <div className="bg-white font-sans overflow-x-hidden">
+    <div className="bg-#B95B2A font-sans overflow-x-hidden">
       
     
       <section className="relative min-h-[70vh] md:h-[90vh] w-full bg-neutral-900">

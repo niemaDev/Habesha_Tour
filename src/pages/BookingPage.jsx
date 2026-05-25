@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   User, Mail, Phone, Calendar, 
   Users, CreditCard, ArrowRight, ArrowLeft
@@ -6,8 +6,10 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 const BookingPage = () => {
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // State for form data
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -15,9 +17,16 @@ const BookingPage = () => {
     phone: '',
     departureDate: '',
     travelers: '1',
-    specialRequests: '',
     agreeToTerms: false
   });
+
+  // Check if user is logged in before booking
+  useEffect(() => {
+    if (localStorage.getItem('isLoggedIn') !== 'true') {
+      alert("Please login to book a tour");
+      navigate('/login');
+    }
+  }, [navigate]);
 
   const PRICE_PER_PERSON = 45000;
   const total = PRICE_PER_PERSON * parseInt(formData.travelers);
@@ -43,12 +52,36 @@ const BookingPage = () => {
     }
 
     setIsSubmitting(true);
+
     try {
-      console.log("Processing Booking...", formData);
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert(`Success! Redirecting ${formData.firstName} to Payment...`);
+      const userId = localStorage.getItem('userId');
+      
+      const bookingData = {
+        user_id: userId,
+        tour_name: "Simien Mountains Trek", // This can be dynamic based on selection
+        tour_date: formData.departureDate,
+        price: total,
+        image_url: "https://images.unsplash.com/photo-1541410965313-d53b3c16ef17?auto=format&fit=crop&q=80",
+        status: 'Confirmed'
+      };
+
+      const response = await fetch('http://localhost/habesha-backend/add_booking.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert(`Success! Your booking for ${bookingData.tour_name} is confirmed.`);
+        navigate('/dashboard'); // Redirect to dashboard to see the new entry
+      } else {
+        alert("Booking failed: " + result.message);
+      }
     } catch (error) {
-      alert("Error processing booking.");
+      console.error("Connection Error:", error);
+      alert("Could not connect to the server.");
     } finally {
       setIsSubmitting(false);
     }
@@ -56,10 +89,9 @@ const BookingPage = () => {
 
   return (
     <div className="bg-[#FAF9F6] min-h-screen font-sans text-[#2D1B14] pb-32 lg:pb-12">
-      {/* Top Navigation Bar */}
       <div className="max-w-7xl mx-auto px-4 md:px-16 lg:px-24 pt-8">
         <button 
-          onClick={() => navigate(-1)} // Goes back to previous page
+          onClick={() => navigate(-1)} 
           className="flex items-center gap-2 text-gray-400 hover:text-[#B95B2A] transition font-bold text-sm"
         >
           <ArrowLeft size={16} /> Back to Tours
@@ -73,24 +105,11 @@ const BookingPage = () => {
         </div>
 
         <form onSubmit={handleProceedToPayment} className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-          
-          {/* Mobile Header Summary */}
-          <div className="lg:hidden bg-white p-4 rounded-3xl border border-gray-100 flex items-center gap-4">
-            <img 
-              src="https://images.unsplash.com/photo-1541410965313-d53b3c16ef17?auto=format&fit=crop&q=80" 
-              className="w-16 h-16 rounded-2xl object-cover" alt="Tour" 
-            />
-            <div>
-              <h4 className="font-bold text-[#2D1B14]">Simien Mountains Trek</h4>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest text-[10px]">7 Days</p>
-            </div>
-          </div>
-
           <div className="lg:col-span-8 space-y-6 md:space-y-10">
-            {/* Personal Info Section */}
-            <section className="bg-white p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] border border-gray-100 shadow-sm">
-              <h3 className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest mb-6 md:mb-8">Personal Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
+            {/* Personal Info */}
+            <section className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm">
+              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Personal Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <FormInput label="First Name *" name="firstName" value={formData.firstName} onChange={handleInputChange} icon={<User size={18}/>} placeholder="John" required />
                 <FormInput label="Last Name *" name="lastName" value={formData.lastName} onChange={handleInputChange} icon={<User size={18}/>} placeholder="Doe" required />
                 <FormInput label="Email Address *" name="email" type="email" value={formData.email} onChange={handleInputChange} icon={<Mail size={18}/>} placeholder="john@example.com" required />
@@ -98,17 +117,17 @@ const BookingPage = () => {
               </div>
             </section>
 
-            {/* Travel Details Section */}
-            <section className="bg-white p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] border border-gray-100 shadow-sm">
-              <h3 className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest mb-6 md:mb-8">Travel Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
+            {/* Travel Details */}
+            <section className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm">
+              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Travel Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <FormInput label="Departure Date *" name="departureDate" type="date" value={formData.departureDate} onChange={handleInputChange} icon={<Calendar size={18}/>} required />
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-bold ml-1">Travelers *</label>
                   <div className="relative">
                     <select 
                       name="travelers" value={formData.travelers} onChange={handleInputChange}
-                      className="w-full p-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-orange-100 appearance-none font-medium text-gray-700"
+                      className="w-full p-4 bg-gray-50 border-none rounded-2xl outline-none appearance-none font-medium text-gray-700"
                     >
                       {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Person' : 'People'}</option>)}
                     </select>
@@ -121,48 +140,30 @@ const BookingPage = () => {
             <div className="space-y-6">
               <label className="flex items-start gap-4 cursor-pointer">
                 <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleInputChange} className="mt-1 accent-[#B95B2A] w-5 h-5 rounded" />
-                <span className="text-xs md:text-sm text-gray-500 leading-relaxed">I agree to the terms and 30% deposit requirement.</span>
+                <span className="text-xs md:text-sm text-gray-500 leading-relaxed">I agree to the terms and conditions.</span>
               </label>
 
               <button 
                 type="submit" disabled={isSubmitting}
-                className={`hidden lg:flex w-full py-6 rounded-2xl font-black text-lg items-center justify-center gap-3 shadow-2xl transition-all ${
+                className={`w-full py-6 rounded-2xl font-black text-lg flex items-center justify-center gap-3 shadow-2xl transition-all ${
                   isSubmitting ? 'bg-gray-300' : 'bg-[#B95B2A] text-white hover:bg-[#a04e24]'
                 }`}
               >
-                {isSubmitting ? "Processing..." : <><CreditCard size={22} /> Proceed to Payment <ArrowRight /></>}
+                {isSubmitting ? "Processing..." : <><CreditCard size={22} /> Confirm Booking <ArrowRight /></>}
               </button>
             </div>
           </div>
 
-          {/* Desktop Sidebar */}
+          {/* Sidebar Summary */}
           <aside className="hidden lg:block lg:col-span-4">
             <div className="bg-white p-8 rounded-[3rem] border border-gray-50 sticky top-10 shadow-2xl shadow-gray-200/50">
-              <h3 className="text-xl font-bold mb-6">Booking Summary</h3>
-              <div className="rounded-3xl overflow-hidden mb-6 h-40">
-                <img src="https://images.unsplash.com/photo-1541410965313-d53b3c16ef17?auto=format&fit=crop&q=80" className="w-full h-full object-cover" alt="Simien" />
-              </div>
+              <h3 className="text-xl font-bold mb-6">Summary</h3>
               <div className="flex justify-between text-sm font-medium mb-4">
                 <span className="text-gray-400">Total Price</span>
                 <span className="text-[#2D1B14] font-black text-xl">{total.toLocaleString()} ETB</span>
               </div>
-              <div className="bg-orange-50/50 p-4 rounded-2xl text-[#B95B2A] text-[10px] font-black uppercase text-center">Free cancellation up to 14 days before</div>
             </div>
           </aside>
-
-          {/* Mobile Sticky Bar */}
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 z-[100] flex items-center justify-between shadow-2xl">
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase">Total Amount</p>
-              <p className="text-xl font-black text-[#B95B2A]">{total.toLocaleString()} ETB</p>
-            </div>
-            <button 
-              type="button" onClick={handleProceedToPayment} disabled={isSubmitting}
-              className="bg-[#B95B2A] text-white px-8 py-4 rounded-2xl font-bold text-sm active:scale-95 transition-transform"
-            >
-              {isSubmitting ? "Wait..." : "Pay Now"}
-            </button>
-          </div>
         </form>
       </div>
     </div>
